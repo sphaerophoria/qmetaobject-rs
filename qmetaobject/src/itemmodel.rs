@@ -50,6 +50,14 @@ pub trait QAbstractItemModel: QObject {
     /// Refer to the Qt documentation of QAbstractItemModel::data
     fn data(&self, index: QModelIndex, role: i32) -> QVariant;
 
+    fn can_fetch_more(&self, parent: QModelIndex) -> bool {
+        false
+    }
+
+    fn fetch_more(&mut self, parent: QModelIndex) {
+
+    }
+
     /// Refer to the Qt documentation of QAbstractItemModel::setData
     fn set_data(&mut self, _index: QModelIndex, _value: &QVariant, _role: i32) -> bool {
         false
@@ -273,6 +281,24 @@ cpp! {{
                 }
             });
             return base;
+        }
+
+        bool canFetchMore(const QModelIndex& index) const override {
+            return rust!(Rust_QAbstractItemModel_canFetchMore [
+                rust_object: QObjectPinned<dyn QAbstractItemModel> as "TraitObject",
+                index: QModelIndex as "QModelIndex"
+            ] -> bool as "bool" {
+                rust_object.borrow_mut().can_fetch_more(index)
+            });
+        }
+
+        void fetchMore(const QModelIndex& parent) override {
+            return rust!(Rust_QAbstractItemModel_fetchMore [
+                rust_object: QObjectPinned<dyn QAbstractItemModel> as "TraitObject",
+                parent: QModelIndex as "QModelIndex"
+            ] {
+                rust_object.borrow_mut().fetch_more(parent)
+            });
         }
     };
 }}
